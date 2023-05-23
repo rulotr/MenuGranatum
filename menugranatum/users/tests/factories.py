@@ -1,4 +1,7 @@
-from collections.abc import Sequence
+# Para python >= 3.9
+#from collections.abc import Sequence
+# Para python < 3.9
+from typing import Sequence
 from typing import Any
 
 from django.contrib.auth import get_user_model
