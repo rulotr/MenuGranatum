@@ -49,7 +49,7 @@ LOCALE_PATHS = [str(BASE_DIR / "locale")]
 DATABASES = {
     "default": env.db(
         "DATABASE_URL",
-        default="postgres:///menugranatum",
+        default="postgres://postgres:mibd123@127.0.0.1:543/menudb",
     ),
 }
 DATABASES["default"]["ATOMIC_REQUESTS"] = True

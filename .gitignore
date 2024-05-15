@@ -274,3 +274,6 @@ dump.rdb
 menugranatum/media/
 
 .pytest_cache/
+
+# Enviroment variables
+.env
