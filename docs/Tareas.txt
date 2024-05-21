@@ -1,0 +1,43 @@
+Crear modulos
+    *El nombre no puede tener espacios en blanco
+    *El nombre no puede ser vacio
+    *Los modulos tienen nombre unicos
+    *Se puede cambiar el nombre del modulo
+    *Se puede eliminar un modulo dando su pk
+    *Que pasa si se quiere modificar un modulo que no existe
+    *Eliminar un id que no existe
+    *Consultar modulo por id
+
+Pruebas del Api de Modulos
+    *Listar todos los modulos
+    *Crear un nuevo modulo
+    *Crear un modulo con un nombre que ya existe
+    *Crear in modulo existente con minusculas
+    *Consultar por el id del modulo
+    *Modificar el nombre de un modulo
+    *Modificar el nombre de un modulo con uno ya existente
+    *Eliminar un modulo
+    *Eliminar un id que no existe
+
+Crear menus
+    *Un nodo del menu pertenecen a un modulo
+    *Un nodo del menu puede tener otros nodos hijos
+    *Al crear un nodo hijo este pertenece al mismo modulo que el padre
+    *Si el modulo no existe debe de informar
+    *Los nombres de los nodos pueden repetirse
+    *Se pueden crear varios menus sin padre dentro del mismo modulos
+    (*No)Solo debe exisitir un nodo principal por moulo, este no tiene nodo padre
+    *Se pueden modificar los nombres de los nodos
+    *Los nodos tienen un orden consecutivo por nivel
+    *Se puede modificar el orden de los nodos y esto modifica el orden de los del nivel 
+    Se puede mover el nodo a otro nodo padre
+    No se puede mover un nodo a otro que pertensca a otro modulo
+    *No se puede crear un Menu sin modulo
+
+Pruebas del Api de menus
+    *Crear un menu con un hijo
+    *Crear varios menus para un modulo y revisar el orden
+    *Crear un menu de tres profundidades
+    *Modificar el nombre de un menu
+    *Cambiar el orden de un menu
+    *Obtener el arbol de un modulo en especifico
