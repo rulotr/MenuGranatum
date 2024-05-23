@@ -9,6 +9,7 @@ MyManager = MenuManager()
 class Menu(models.Model):
     name = models.CharField(max_length=50)
     path = models.CharField(max_length=50, blank=True ,default='')
+    order = models.PositiveSmallIntegerField(default=0)
 
 
     def __str__(self):
