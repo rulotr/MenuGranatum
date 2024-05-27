@@ -42,7 +42,7 @@ Consultas base del menu:
     Obtener el numero de hijos de un nodo
     Obtener el nivel de profundidad de un nodo
     Obtener los hermanos de un nodo dado
-    Obtener el padre de un nodo dado
+    *Obtener el padre de un nodo dado
     Obtener el ultimo el orden del ultimo hijo
     
 

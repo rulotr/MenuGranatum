@@ -110,6 +110,30 @@ class TestMeuOperations(TestCase):
         self.assertEqual(menu1.depth, 2)
         self.assertEqual(menu2.depth, 3)
 
+    def test_next_order_num_modules(self):
+        Menu.objects.create(id=1, name=" Module 1 ", depth=1, order=2)
+        
+        module2 = Menu.objects.execute_create(name=" Module 2 ",  id=2)
+        
+        self.assertEqual(module2.order, 3)
+
+    def test_next_order_num_menu_creation(self):
+        
+        Menu.objects.create(id=1, name="Module 1   ", path='/1',   depth=1,  order=1)
+        Menu.objects.create(id=2, name="..Menu 1.1   ", path='/1/2',  depth=2, order=1)
+        Menu.objects.create(id=3, name="....Menu 1.1.1 ", path='/1/2/3', depth=3,order=1)
+        Menu.objects.create(id=4, name="..Menu 1.2   ", path='/1/4',  depth=2, order=3)
+        # try that /1 is different from /11 in the query path__startswith
+        Menu.objects.create(id=11, name="Module 11  ", path='/11', depth=1, order=1)
+        Menu.objects.create(id=12, name="..Menu 11.1  ", path='/11/6', depth=2,  order=5 )
+        
+
+        menu7 = Menu.objects.execute_create(id=7, name="Menu 1.3", parent_id=1)
+        menu8 = Menu.objects.execute_create(id=8, name="Menu 1.1.1.1", parent_id=3)
+        
+        self.assertEqual(menu7.order, 4)
+        self.assertEqual(menu8.order, 1)
+
 
 class TestMenuQueries(TestCase):
 
@@ -140,26 +164,37 @@ class TestMenuQueries(TestCase):
 
         self.assertEqual(m3_childrens[0].name, "Menu 2.1.1")
         self.assertEqual(len(m3_childrens), 1)
+    
+    def test_get_parent_from_path(self):
+        path1= '/1'
+        path2 = '/1/2'
+        path3 = '/1/2/3'
+        
 
-    def test_next_order_num_modules(self):
-        Menu.objects.create(name=" Module 1 ", order=2, depth=1,  id=1)
-        
-        module2 = Menu.objects.execute_create(name=" Module 2 ",  id=2)
-        
-        self.assertEqual(module2.order, 3)
+        id_parent1 = Menu.objects.get_parent_from_path(path=path1)
+        id_parent2 = Menu.objects.get_parent_from_path(path=path2)
+        id_parent3 = Menu.objects.get_parent_from_path(path=path3)
 
-    def test_next_order_num_menu(self):
-        module1 = Menu.objects.create(name=" Module 1 ", path='/1', depth=1,  id=1, order=1)
-        menu1 = Menu.objects.create(name="Menu 1.1", id=3, path='/1/3', depth=2, order=1)
-        menu2 = Menu.objects.create(name="Menu 1.2", id=4, path='/1/4', depth=2, order=3)
-        menu3 = Menu.objects.create(name="Menu 1.1.1",   id=5, path='/1/3/5', depth=3,  order=1)
-        # try that /1 is different from /11
-        module11 = Menu.objects.create(name=" Module 11 ", path='/11', depth=1,  id=6, order=1)
-        menu4 = Menu.objects.create(name="Menu 11.1",   id=7, path='/11/7', depth=2,  order=5 )
-       
-        menu5 = Menu.objects.execute_create(name="Menu 1.2.3", parent_id=module1.id, id=8)
-        menu6 = Menu.objects.execute_create(name="Menu 1.1.1.1", parent_id=menu3.id, id=9)
-        
-        self.assertEqual(menu5.order, 4)
-        self.assertEqual(menu6.order, 1)
+        self.assertEqual(None, id_parent1)
+        self.assertEqual(1, id_parent2)
+        self.assertEqual(2, id_parent3)
+
+  
+    def test_get_parent(self):
+        Menu.objects.create(id=1, name="Module 1   ", path='/1',   depth=1,  order=1)
+        Menu.objects.create(id=2, name="..Menu 1.1   ", path='/1/2',  depth=2, order=1)
+        Menu.objects.create(id=3, name="....Menu 1.1.1 ", path='/1/2/3', depth=3,order=1)
+        Menu.objects.create(id=4, name="..Menu 1.2   ", path='/1/4',  depth=2, order=3)
+     
+        module1 = Menu.objects.get(id=1)
+        menu1 = Menu.objects.get(id=2)
+        menu2 = Menu.objects.get(id=3)
+
+        parent1 = Menu.objects.get_parent(node=module1)
+        parent2 = Menu.objects.get_parent(node=menu1)
+        parent3 = Menu.objects.get_parent(node=menu2) 
+
+        self.assertEqual(parent1, None)
+        self.assertEqual(parent2.id, 1)  
+        self.assertEqual(parent3.id, 2)      
 

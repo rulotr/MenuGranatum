@@ -13,6 +13,20 @@ class MenuQueryset(models.query.QuerySet):
         children = self._filter_by_path_parent(node)
 
         return children
+
+    def get_parent_from_path(self, path):
+        parents_id = path.split('/')[-2]
+
+        if parents_id == '' :
+            return None
+
+        return int(parents_id)
+    
+    def get_parent(self, node):
+        parent_id = self.get_parent_from_path(node.path)
+        if(parent_id is None):
+            return None
+        return self.get(id=parent_id)            
     
       
     def _get_next_order_num(self, parent):
