@@ -2,7 +2,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.db.models.functions import Coalesce
-from django.db.models import Max
+from django.db.models import Max, F
 
 class MenuQueryset(models.query.QuerySet):
     def _filter_by_path_parent(self, parent):
@@ -39,6 +39,9 @@ class MenuQueryset(models.query.QuerySet):
                 num=Coalesce(Max("order"), 0))['num'] 
         
         return order + 1
+    
+
+
 
 class MenuManager(models.Manager):
 
@@ -76,3 +79,18 @@ class MenuManager(models.Manager):
         else:
             return f"/{menu.id}"  # Nodo principal
   
+    def make_next_sibling_of(self, node_origin_id, node_sibiling_id):
+        node_origin = self.get(id=node_origin_id)
+        node_sibiling = self.get(id=node_sibiling_id)
+        parent_origin = self.get_parent(node_origin)
+        parent_sibiling = self.get_parent(node_sibiling)
+
+        if(parent_origin == parent_sibiling):
+            if(node_origin.order < node_sibiling.order): 
+                self.get_children(parent_origin).filter(order__gt=node_origin.order, order__lte=node_sibiling.order).update(order=F('order') - 1)
+
+            if(node_origin.order > node_sibiling.order):
+                self.get_children(parent_origin).filter( order__gte=node_sibiling.order, order__lt=node_origin.order).update(order=F('order') + 1)
+
+        node_origin.order = node_sibiling.order
+        node_origin.save()

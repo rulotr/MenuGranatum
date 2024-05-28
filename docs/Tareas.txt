@@ -33,6 +33,9 @@ Crear menus
     Se puede mover el nodo a otro nodo padre
     No se puede mover un nodo a otro que pertensca a otro modulo
     No se puede crear un Menu sin modulo
+    Mover un nodo debajo de otro nodo
+    Mover un nodo arriba de otro nodo
+    Hacer un nodo hijo de otro nodo
 
 Consultas base del menu:
     Obtener solo los modulos
