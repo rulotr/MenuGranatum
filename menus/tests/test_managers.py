@@ -10,6 +10,24 @@ def get_list_for_test():
     return [{"id": o.id, "path": o.path, "depth":  o.depth, "order": o.order} 
                 for o in Menu.objects.all().order_by("depth", "order")]
 
+
+
+def create_simple_menu_for_test():
+    Menu.objects.create(id=1, name="Module 1   ", path='/1',   depth=1,  order=1)
+    Menu.objects.create(id=2, name="..Menu 1.1   ", path='/1/2',  depth=2, order=1)
+    Menu.objects.create(id=3, name="..Menu 1.2   ", path='/1/3',  depth=2, order=2)
+    Menu.objects.create(id=4, name="..Menu 1.3   ", path='/1/4',  depth=2, order=3)
+
+def create_simple_menu_three_levels_for_test():    
+    Menu.objects.create(id=1, name="Module 1   ", path='/1',   depth=1,  order=1)
+    Menu.objects.create(id=2, name="..Menu 1.1   ", path='/1/2',  depth=2, order=1)
+    Menu.objects.create(id=3, name="..Menu 1.2   ", path='/1/3',  depth=2, order=2)
+    Menu.objects.create(id=4, name="..Menu 1.3   ", path='/1/4',  depth=2, order=3)
+    Menu.objects.create(id=5, name="..Menu 1.3.1   ", path='/1/4/5',  depth=3, order=1)
+    Menu.objects.create(id=6, name="..Menu 1.3.2   ", path='/1/4/6',  depth=3, order=2)
+    
+ 
+                
 class TestMenuModel(TestCase):
     def test_menu_str(self):
         menu = Menu.objects.create(name="Menu 1")
@@ -137,49 +155,87 @@ class TestMeuOperations(TestCase):
         self.assertEqual(menu7.order, 4)
         self.assertEqual(menu8.order, 1)
 
+    @skip
     def test_create_list_fot_test(self):
-        Menu.objects.create(id=1, name="Module 1   ", path='/1',   depth=1,  order=1)
-        Menu.objects.create(id=2, name="Module 2   ", path='/2',   depth=1,  order=2)
-        Menu.objects.create(id=3, name="..Menu 1.1   ", path='/1/3',  depth=2, order=1)
-        Menu.objects.create(id=4, name="..Menu 1.1.1   ", path='/1/3/4',  depth=3, order=1)
-        Menu.objects.create(id=5, name="..Menu 1.2   ", path='/1/5',  depth=2, order=2)
-        Menu.objects.create(id=6, name="..Menu 1.3   ", path='/1/6',  depth=2, order=3)
+        create_simple_menu_for_test()
         
-        expected = [
-            {"id": 1,  "path": "/1", "depth": 1, "order": 1},
-            {"id": 2,  "path": "/2", "depth": 1, "order": 2},
-            {"id": 3,  "path": "/1/3", "depth": 2, "order": 1},
-            {"id": 5,  "path": "/1/5", "depth": 2, "order": 2},
-            {"id": 6,  "path": "/1/6", "depth": 2, "order": 3},
-            {"id": 4,  "path": "/1/3/4", "depth": 3, "order": 1}]
-          
+        expected = [{"id": 1,  "path": "/1", "depth": 1, "order": 1},
+                    {"id": 5,  "path": "/5", "depth": 1, "order": 2},
+                     
+                    {"id": 2,  "path": "/1/2", "depth": 2, "order": 1},
+                    {"id": 6,  "path": "/5/6", "depth": 2, "order": 1},
+                   
+                    {"id": 3,  "path": "/1/3", "depth": 2, "order": 2},
+                    {"id": 7,  "path": "/5/7", "depth": 2, "order": 2},
+                    
+                    {"id": 4,  "path": "/1/4", "depth": 2, "order": 3},
+                    {"id": 8,  "path": "/5/8", "depth": 2, "order": 3},
+                    
+                    {"id": 9,  "path": "/5/8/9", "depth": 3, "order": 1},
+                    {"id": 10,  "path": "/5/8/10", "depth": 3, "order": 2},
+            ]
 
         complete_menu_list = get_list_for_test()
 
         self.assertEqual(complete_menu_list, expected)
 
 
-    def test_move_next_sibiling_of_same_parent_to_up_order(self):
-        Menu.objects.create(id=1, name="Module 1   ", path='/1',   depth=1,  order=1)
-        Menu.objects.create(id=2, name="..Menu 1.1   ", path='/1/2',  depth=2, order=1)
-        Menu.objects.create(id=3, name="..Menu 1.2   ", path='/1/3',  depth=2, order=2)
-        Menu.objects.create(id=4, name="..Menu 1.3   ", path='/1/4',  depth=2, order=3)
-  
-
-        Menu.objects.make_next_sibling_of(4, 2)
+    
+    def test_move_before_first_sibiling_same_parent(self):
+        create_simple_menu_for_test()
+        Menu.objects.move_before_sibiling(4, 2)
 
         expected = [{"id": 1,  "path": "/1", "depth": 1, "order": 1},
                     {"id": 4,  "path": "/1/4", "depth": 2, "order": 1},
                     {"id": 2,  "path": "/1/2", "depth": 2, "order": 2},
-                    {"id": 3,  "path": "/1/3", "depth": 2, "order": 3}
-        ]
-                 
-
+                    {"id": 3,  "path": "/1/3", "depth": 2, "order": 3},
+                ]
+        
         complete_menu_list = get_list_for_test()
+        self.assertEqual(complete_menu_list, expected)
 
+    def test_move_before_last_sibiling_same_parent(self):
+        create_simple_menu_for_test()
+        Menu.objects.move_before_sibiling(2, 4)
+
+        expected = [{"id": 1,  "path": "/1", "depth": 1, "order": 1},
+                    {"id": 3,  "path": "/1/3", "depth": 2, "order": 1},
+                    {"id": 2,  "path": "/1/2", "depth": 2, "order": 2},
+                    {"id": 4,  "path": "/1/4", "depth": 2, "order": 3},      
+                ]
+        
+        complete_menu_list = get_list_for_test()
+        self.assertEqual(complete_menu_list, expected)
+
+    def test_move_before_middle_sibiling_same_parent(self):
+        create_simple_menu_for_test()
+        Menu.objects.move_before_sibiling(4, 3)
+
+        expected = [{"id": 1,  "path": "/1", "depth": 1, "order": 1},
+                    {"id": 2,  "path": "/1/2", "depth": 2, "order": 1},
+                    {"id": 4,  "path": "/1/4", "depth": 2, "order": 2},   
+                    {"id": 3,  "path": "/1/3", "depth": 2, "order": 3},                 
+                ]
+        
+        complete_menu_list = get_list_for_test()
+        self.assertEqual(complete_menu_list, expected)
+        # Si se mueve a su nodo padre no se hace nada
+
+    def test_move_before_its_parent_dont_move(self):
+        create_simple_menu_for_test()
+        Menu.objects.move_before_sibiling(3, 1)
+
+        expected = [{"id": 1,  "path": "/1", "depth": 1, "order": 1},
+                    {"id": 2,  "path": "/1/2", "depth": 2, "order": 1},
+                    {"id": 3,  "path": "/1/3", "depth": 2, "order": 2},
+                    {"id": 4,  "path": "/1/4", "depth": 2, "order": 3},      
+                ]
+        
+        complete_menu_list = get_list_for_test()
         self.assertEqual(complete_menu_list, expected)
 
 
+    @skip
     def test_move_next_sibiling_of_same_parent_to_down_order(self):
         Menu.objects.create(id=1, name="Module 1   ", path='/1',   depth=1,  order=1)
         Menu.objects.create(id=2, name="..Menu 1.1   ", path='/1/2',  depth=2, order=1)

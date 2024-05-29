@@ -79,7 +79,7 @@ class MenuManager(models.Manager):
         else:
             return f"/{menu.id}"  # Nodo principal
   
-    def make_next_sibling_of(self, node_origin_id, node_sibiling_id):
+    def move_before_sibiling(self, node_origin_id, node_sibiling_id):
         node_origin = self.get(id=node_origin_id)
         node_sibiling = self.get(id=node_sibiling_id)
         parent_origin = self.get_parent(node_origin)
@@ -87,10 +87,11 @@ class MenuManager(models.Manager):
 
         if(parent_origin == parent_sibiling):
             if(node_origin.order < node_sibiling.order): 
-                self.get_children(parent_origin).filter(order__gt=node_origin.order, order__lte=node_sibiling.order).update(order=F('order') - 1)
+                self.get_children(parent_origin).filter(order__gt=node_origin.order, order__lt=node_sibiling.order).update(order=F('order') - 1)
+                node_origin.order = node_sibiling.order - 1
 
             if(node_origin.order > node_sibiling.order):
                 self.get_children(parent_origin).filter( order__gte=node_sibiling.order, order__lt=node_origin.order).update(order=F('order') + 1)
+                node_origin.order = node_sibiling.order
 
-        node_origin.order = node_sibiling.order
         node_origin.save()
