@@ -78,13 +78,17 @@ class MenuManager(models.Manager):
             return f"{parent.path}/{menu.id}"
         else:
             return f"/{menu.id}"  # Nodo principal
-  
+
+        
     def move_before_sibiling(self, node_origin_id, node_sibiling_id):
         node_origin = self.get(id=node_origin_id)
         node_sibiling = self.get(id=node_sibiling_id)
         parent_origin = self.get_parent(node_origin)
         parent_sibiling = self.get_parent(node_sibiling)
 
+        if(node_sibiling.id == parent_origin.id and parent_sibiling==None):
+            return
+        
         if(parent_origin == parent_sibiling):
             if(node_origin.order < node_sibiling.order): 
                 self.get_children(parent_origin).filter(order__gt=node_origin.order, order__lt=node_sibiling.order).update(order=F('order') - 1)
@@ -93,5 +97,15 @@ class MenuManager(models.Manager):
             if(node_origin.order > node_sibiling.order):
                 self.get_children(parent_origin).filter( order__gte=node_sibiling.order, order__lt=node_origin.order).update(order=F('order') + 1)
                 node_origin.order = node_sibiling.order
+
+        if(parent_origin != parent_sibiling):
+            new_path = f"{parent_sibiling.path}/{node_origin.id}" 
+            node_origin.path = new_path
+            node_origin.depth = node_sibiling.depth 
+            node_origin.order = node_sibiling.order
+            self.get_children(parent_origin).filter(order__gt=node_origin.order).update(order=F('order') - 1)
+            self.get_children(parent_sibiling).filter(order__gte=node_sibiling.order).update(order=F('order') + 1)
+  
+
 
         node_origin.save()
