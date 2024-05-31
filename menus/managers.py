@@ -1,8 +1,8 @@
 
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.db.models.functions import Coalesce
-from django.db.models import Max, F
+from django.db.models.functions import Coalesce, Replace
+from django.db.models import Max, F, Value as V
 
 class MenuQueryset(models.query.QuerySet):
     def _filter_by_path_parent(self, parent):
@@ -13,6 +13,12 @@ class MenuQueryset(models.query.QuerySet):
         children = self._filter_by_path_parent(node)
 
         return children
+
+    def get_descendants(self, node):
+        descendants = self.filter(path__startswith=node.path + '/'
+                           ).exclude(path=node.path)
+        
+        return descendants
 
     def get_parent_from_path(self, path):
         parents_id = path.split('/')[-2]
@@ -99,13 +105,17 @@ class MenuManager(models.Manager):
                 node_origin.order = node_sibiling.order
 
         if(parent_origin != parent_sibiling):
-            new_path = f"{parent_sibiling.path}/{node_origin.id}" 
+            path_origin  = node_origin.path + "/"
+            depth_diff = node_origin.depth - node_sibiling.depth
+            new_path = f"{parent_sibiling.path}/{node_origin.id}"
+            descendents = self.get_descendants(node_origin) 
             node_origin.path = new_path
             node_origin.depth = node_sibiling.depth 
             node_origin.order = node_sibiling.order
             self.get_children(parent_origin).filter(order__gt=node_origin.order).update(order=F('order') - 1)
             self.get_children(parent_sibiling).filter(order__gte=node_sibiling.order).update(order=F('order') + 1)
-  
-
+            # Change the path of children
+            descendents.update(path = Replace('path', V(path_origin), V(new_path +"/")), depth = F('depth') - depth_diff)
+        
 
         node_origin.save()

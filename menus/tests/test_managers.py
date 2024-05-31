@@ -8,7 +8,7 @@ from menus.models import Menu
 
 def get_list_for_test():
     return [{"id": o.id, "path": o.path, "depth":  o.depth, "order": o.order} 
-                for o in Menu.objects.all().order_by("depth", "order")]
+                for o in Menu.objects.all().order_by("depth", "order", "id")]
 
 
 
@@ -26,7 +26,16 @@ def create_simple_menu_four_levels_for_test():
     Menu.objects.create(id=5, name="..Menu 1.3.1   ", path='/1/4/5',  depth=3, order=1)
     Menu.objects.create(id=6, name="..Menu 1.3.2   ", path='/1/4/6',  depth=3, order=2)
     Menu.objects.create(id=7, name="..Menu 1.3.2.1   ", path='/1/4/6/7',  depth=4, order=1)
+    
+    expected = [ { "id": 1,  "path": "/1", "depth": 1, "order": 1},
+                 { "id": 2,  "path": "/1/2", "depth": 2, "order": 1},
+                 { "id": 3,  "path": "/1/3", "depth": 2, "order": 2},
+                 { "id": 4,  "path": "/1/4", "depth": 2, "order": 3},
+                 { "id": 5,  "path": "/1/4/5", "depth": 3, "order": 1},
+                 { "id": 6,  "path": "/1/4/6", "depth": 3, "order": 2},
+                 { "id": 7,  "path": "/1/4/6/7", "depth": 4, "order": 1},]
 
+    return expected
                 
 class TestMenuModel(TestCase):
     def test_menu_str(self):
@@ -301,28 +310,23 @@ class TestMeuOperations(TestCase):
             
             complete_menu_list = get_list_for_test()
             self.assertEqual(complete_menu_list, expected)
-    @skip
-    def test_move_next_sibiling_of_same_parent_to_down_order(self):
-        Menu.objects.create(id=1, name="Module 1   ", path='/1',   depth=1,  order=1)
-        Menu.objects.create(id=2, name="..Menu 1.1   ", path='/1/2',  depth=2, order=1)
-        Menu.objects.create(id=3, name="..Menu 1.2   ", path='/1/3',  depth=2, order=2)
-        Menu.objects.create(id=4, name="..Menu 1.3   ", path='/1/4',  depth=2, order=3)
-  
 
-        Menu.objects.make_next_sibling_of(2, 4)
-
-        expected = [{"id": 1,  "path": "/1", "depth": 1, "order": 1},
-                    {"id": 3,  "path": "/1/3", "depth": 2, "order": 1},
-                    {"id": 4,  "path": "/1/4", "depth": 2, "order": 2},
-                    {"id": 2,  "path": "/1/2", "depth": 2, "order": 3},
-        ]
-                 
-
-        complete_menu_list = get_list_for_test()
-
-        self.assertEqual(complete_menu_list, expected)
+    def test_move_node_with_children_before_first_sibiling_different_parent(self):
+            create_simple_menu_four_levels_for_test()
+            
+            Menu.objects.move_before_sibiling(6, 2)
+            
+            expected = [ { "id": 1,  "path": "/1", "depth": 1, "order": 1},
+                 { "id": 6,  "path": "/1/6", "depth": 2, "order": 1},
+                 { "id": 2,  "path": "/1/2", "depth": 2, "order": 2},
+                 { "id": 3,  "path": "/1/3", "depth": 2, "order": 3},
+                 { "id": 4,  "path": "/1/4", "depth": 2, "order": 4},
+                 { "id": 5,  "path": "/1/4/5", "depth": 3, "order": 1},
+                 { "id": 7,  "path": "/1/6/7", "depth": 3, "order": 1},]
 
 
+            complete_menu_list = get_list_for_test()
+            self.assertEqual(complete_menu_list, expected)
 
 class TestMenuQueries(TestCase):
 
@@ -353,7 +357,19 @@ class TestMenuQueries(TestCase):
 
         self.assertEqual(m3_childrens[0].name, "Menu 2.1.1")
         self.assertEqual(len(m3_childrens), 1)
-    
+
+
+    def test_get_descendants(self):
+            create_simple_menu_four_levels_for_test()
+            menu1 = Menu.objects.get(id=4)
+            descendants = Menu.objects.get_descendants(menu1)
+            
+            self.assertEqual(descendants[0].path, "/1/4/5")
+            self.assertEqual(descendants[1].path, "/1/4/6")
+            self.assertEqual(descendants[2].path, "/1/4/6/7")
+            self.assertEqual(len(descendants), 3)
+            
+            
     def test_get_parent_from_path(self):
         path1= '/1'
         path2 = '/1/2'
