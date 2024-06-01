@@ -328,6 +328,27 @@ class TestMeuOperations(TestCase):
             complete_menu_list = get_list_for_test()
             self.assertEqual(complete_menu_list, expected)
 
+    def test_move_node_with_children_before_last_sibiling_different_parent(self):
+            create_simple_menu_four_levels_for_test()
+
+            Menu.objects.create(id=8, name="..Menu 1.2.1   ", path='/1/2/8',  depth=3, order=1)
+
+            Menu.objects.move_before_sibiling(2, 7)
+            
+            expected = [ { "id": 1,  "path": "/1", "depth": 1, "order": 1},
+                 { "id": 3,  "path": "/1/3", "depth": 2, "order": 1},
+                 { "id": 4,  "path": "/1/4", "depth": 2, "order": 2},
+                 { "id": 5,  "path": "/1/4/5", "depth": 3, "order": 1},
+                 { "id": 6,  "path": "/1/4/6", "depth": 3, "order": 2},
+                 { "id": 2,  "path": "/1/4/6/2", "depth": 4, "order": 1},
+                 { "id": 7,  "path": "/1/4/6/7", "depth": 4, "order": 2},
+                 { "id": 8,  "path": "/1/4/6/2/8", "depth": 5, "order": 1},
+              ]
+
+
+            complete_menu_list = get_list_for_test()
+            self.assertEqual(complete_menu_list, expected)
+
 class TestMenuQueries(TestCase):
 
     def test_get_childrens(self):
