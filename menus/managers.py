@@ -6,6 +6,9 @@ from django.db.models import Max, F, Value as V
 
 class MenuQueryset(models.query.QuerySet):
     def _filter_by_path_parent(self, parent):
+        if parent is None:
+            return self.filter(depth=1)
+        
         return self.filter(path__startswith=parent.path + '/', depth=parent.depth+1
                            ).exclude(path=parent.path)
     
@@ -92,7 +95,7 @@ class MenuManager(models.Manager):
         parent_origin = self.get_parent(node_origin)
         parent_sibiling = self.get_parent(node_sibiling)
 
-        if(node_sibiling.id == parent_origin.id and parent_sibiling==None):
+        if(parent_origin is not None and node_sibiling.id == parent_origin.id and parent_sibiling==None):
             return
         
         if(parent_origin == parent_sibiling):

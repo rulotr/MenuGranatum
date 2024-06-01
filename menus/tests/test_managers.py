@@ -18,6 +18,11 @@ def create_simple_menu_for_test():
     Menu.objects.create(id=3, name="..Menu 1.2   ", path='/1/3',  depth=2, order=2)
     Menu.objects.create(id=4, name="..Menu 1.3   ", path='/1/4',  depth=2, order=3)
 
+    expected = [{"id": 1,  "path": "/1", "depth": 1, "order": 1},
+                {"id": 2,  "path": "/1/2", "depth": 2, "order": 1},
+                {"id": 3,  "path": "/1/3", "depth": 2, "order": 2},
+                {"id": 4,  "path": "/1/4", "depth": 2, "order": 3},]
+
 def create_simple_menu_four_levels_for_test():    
     Menu.objects.create(id=1, name="Module 1   ", path='/1',   depth=1,  order=1)
     Menu.objects.create(id=2, name="..Menu 1.1   ", path='/1/2',  depth=2, order=1)
@@ -75,7 +80,7 @@ class TestModuleOperations(TestCase):
         with self.assertRaisesMessage(ValidationError, "El nombre no puede estar vacío"):
             Menu.objects.execute_create(name="     ")
 
-    @skip("Not implemented yet")
+
     def test_create_module_with_order(self):
         module1 = Menu.objects.execute_create(name=" Module 1 ")
         module2 = Menu.objects.execute_create(name=" Module 1 ")
@@ -186,6 +191,37 @@ class TestMeuOperations(TestCase):
 
         complete_menu_list = get_list_for_test()
 
+        self.assertEqual(complete_menu_list, expected)
+
+
+    def test_change_order_module_up(self):
+        create_simple_menu_for_test()
+        Menu.objects.create(id=5, path="/5", name="Module 2 ", depth=1, order=2)                            
+        Menu.objects.move_before_sibiling(5, 1)
+
+        expected = [ {"id": 5,  "path": "/5", "depth": 1, "order": 1},
+                {"id": 1,  "path": "/1", "depth": 1, "order": 2},
+                {"id": 2,  "path": "/1/2", "depth": 2, "order": 1},
+                {"id": 3,  "path": "/1/3", "depth": 2, "order": 2},
+                {"id": 4,  "path": "/1/4", "depth": 2, "order": 3},]
+
+        
+        complete_menu_list = get_list_for_test()
+        self.assertEqual(complete_menu_list, expected)
+
+    def test_change_order_module_down(self):
+        create_simple_menu_for_test()
+        Menu.objects.create(id=5, path="/5", name="Module 2 ", depth=1, order=2)                            
+        Menu.objects.move_before_sibiling(1, 5)
+
+        expected = [ {"id": 1,  "path": "/1", "depth": 1, "order": 1},
+                {"id": 5,  "path": "/5", "depth": 1, "order": 2},
+                {"id": 2,  "path": "/1/2", "depth": 2, "order": 1},
+                {"id": 3,  "path": "/1/3", "depth": 2, "order": 2},
+                {"id": 4,  "path": "/1/4", "depth": 2, "order": 3},]
+
+        
+        complete_menu_list = get_list_for_test()
         self.assertEqual(complete_menu_list, expected)
 
 
@@ -349,6 +385,7 @@ class TestMeuOperations(TestCase):
             complete_menu_list = get_list_for_test()
             self.assertEqual(complete_menu_list, expected)
 
+
 class TestMenuQueries(TestCase):
 
     def test_get_childrens(self):
@@ -379,6 +416,17 @@ class TestMenuQueries(TestCase):
         self.assertEqual(m3_childrens[0].name, "Menu 2.1.1")
         self.assertEqual(len(m3_childrens), 1)
 
+    def test_get_childrens_parent_none_are_modules(self):
+        module1 = Menu.objects.create(name="Module 1", id=1, path='/1', depth=1)
+        module2 = Menu.objects.create(name="Module 2", id=2, path='/2', depth=1)
+        menu1 = Menu.objects.create(name="Menu 1.1", id=3, path='/1/3', depth=2)
+        
+        modules = Menu.objects.get_children(None)
+
+        self.assertEqual(modules[0].name, "Module 1")
+        self.assertEqual(modules[1].name, "Module 2")
+        self.assertEqual(len(modules), 2)
+    
 
     def test_get_descendants(self):
             create_simple_menu_four_levels_for_test()
