@@ -22,17 +22,16 @@ Pruebas del Api de Modulos
 Crear menus
     *Un nodo del menu pertenecen a un modulo
     *Un nodo del menu puede tener otros nodos hijos
-    Al crear un nodo hijo este pertenece al mismo modulo que el padre
+    *Al crear un nodo hijo este pertenece al mismo modulo que el padre
     *Si el nodo padre asignado no existe debe de informar
     Los nombres de los nodos pueden repetirse
     Se pueden crear varios menus sin padre dentro del mismo modulos
-    (*No)Solo debe exisitir un nodo principal por moulo, este no tiene nodo padre
     Se pueden modificar los nombres de los nodos
     *Los nodos tienen un orden consecutivo por nivel
-    Se puede modificar el orden de los nodos y esto modifica el orden de los del nivel 
-    Se puede mover el nodo a otro nodo padre
-    No se puede mover un nodo a otro que pertensca a otro modulo
-    No se puede crear un Menu sin modulo
+    *Se puede modificar el orden de los nodos y esto modifica el orden de los del nivel 
+    *Se puede mover el nodo a otro nodo padre
+     Se puede mover un nodo a otro que pertensca a otro modulo
+     No se puede crear un Menu sin modulo
    * Mover un nodo debajo de otro nodo del mismo nivel
    * Mover un nodo arriba de otro nodo del mismo nivel
      Mover un node debajo de otro nodo de diferente nivel 
@@ -49,7 +48,7 @@ Consultas base del menu:
     Obtener el nivel de profundidad de un nodo
     Obtener los hermanos de un nodo dado
     *Obtener el padre de un nodo dado
-    Obtener el ultimo el orden del ultimo hijo
+    *Obtener el ultimo el orden del ultimo hijo
     
 
 Pruebas del Api de menus
