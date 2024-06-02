@@ -446,6 +446,28 @@ class TestMeuOperations(TestCase):
             complete_menu_list = get_list_for_test()
             self.assertEqual(complete_menu_list, expected)
 
+    def test_move_node_with_children_to_different_module(self):
+            create_simple_menu_four_levels_for_test()
+
+            Menu.objects.create(id=8, name="Module 2", path='/8',  depth=1, order=2)
+            Menu.objects.create(id=9, name="Menu 2.1", path='/8/9',  depth=2, order=1)
+            
+            Menu.objects.move_before_sibling(4, 9)
+            
+            expected = [ { "id": 1,  "path": "/1", "depth": 1, "order": 1},
+                         { "id": 8,  "path": "/8", "depth": 1, "order": 2},
+                 { "id": 2,  "path": "/1/2", "depth": 2, "order": 1},
+                 { "id": 4,  "path": "/8/4", "depth": 2, "order": 1},
+                 { "id": 3,  "path": "/1/3", "depth": 2, "order": 2},
+                 { "id": 9,  "path": "/8/9", "depth": 2, "order": 2},
+                 { "id": 5,  "path": "/8/4/5", "depth": 3, "order": 1},
+                 { "id": 6,  "path": "/8/4/6", "depth": 3, "order": 2},
+                 { "id": 7,  "path": "/8/4/6/7", "depth": 4, "order": 1},]
+
+
+            complete_menu_list = get_list_for_test()
+            self.assertEqual(complete_menu_list, expected)
+
 
 class TestMenuQueries(TestCase):
     def test_get_all_modules(self):

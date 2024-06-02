@@ -80,9 +80,10 @@ class MenuManager(models.Manager):
             descendents = node_origin.get_descendants 
             node_origin.path = new_path
             node_origin.depth = node_sibling.depth 
-            node_origin.order = node_sibling.order
+
             children_parent_origin.filter(order__gt=node_origin.order).update(order=F('order') - 1)
             children_parent_sibling.filter(order__gte=node_sibling.order).update(order=F('order') + 1)
+            node_origin.order = node_sibling.order
             # Change the path of children
             descendents.update(path = Replace('path', V(path_origin), V(new_path +"/")), depth = F('depth') - depth_diff)
         
