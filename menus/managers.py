@@ -56,8 +56,12 @@ class MenuManager(models.Manager):
     def move_before_sibling(self, node_origin_id, node_sibling_id):
         node_origin = self.get(id=node_origin_id)
         node_sibling = self.get(id=node_sibling_id)
+        if node_sibling.path.startswith(f"{node_origin.path}/"):
+            raise ValidationError("El menu no se puede mover debajo de algun hijo suyo")
+        
         parent_origin = node_origin.get_parent
         parent_sibling = node_sibling.get_parent
+    
         children_parent_origin =  parent_origin.get_children if parent_origin is not None else self.get_all_modules()
         children_parent_sibling = parent_sibling.get_children if parent_sibling is not None else self.get_all_modules()
 

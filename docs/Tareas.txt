@@ -30,12 +30,14 @@ Crear menus
     *Los nodos tienen un orden consecutivo por nivel
     *Se puede modificar el orden de los nodos y esto modifica el orden de los del nivel 
     *Se puede mover el nodo a otro nodo padre
-     Se puede mover un nodo a otro que pertensca a otro modulo
+     *Se puede mover un nodo a otro que pertensca a otro modulo
      No se puede crear un Menu sin modulo
    * Mover un nodo debajo de otro nodo del mismo nivel
    * Mover un nodo arriba de otro nodo del mismo nivel
      Mover un node debajo de otro nodo de diferente nivel 
      Mover un node arriba de otro nodo de diferente nivel 
+     No se puede mover un nodo a un lado de un hijo del mismo
+
 
     Hacer un nodo hijo de otro nodo
 
