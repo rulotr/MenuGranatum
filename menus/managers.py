@@ -54,10 +54,10 @@ class MenuManager(models.Manager):
 
         
     def move_before_sibling(self, node_origin_id, node_sibling_id):
-        node_origin = self.get(id=node_origin_id)
-        node_sibling = self.get(id=node_sibling_id)
-        if node_sibling.path.startswith(f"{node_origin.path}/"):
-            raise ValidationError("El menu no se puede mover debajo de algun hijo suyo")
+        node_origin = self.get_node_by_id(node_origin_id)
+        node_sibling = self.get_node_by_id(node_sibling_id)
+
+        self.validate_move(node_origin, node_sibling)
         
         parent_origin = node_origin.get_parent
         parent_sibling = node_sibling.get_parent
@@ -68,15 +68,13 @@ class MenuManager(models.Manager):
         if(parent_origin is not None and node_sibling.id == parent_origin.id and parent_sibling==None):
             return
         
-        if(parent_origin == parent_sibling):
-            if(node_origin.order < node_sibling.order): 
-                children_parent_origin.filter(order__gt=node_origin.order, order__lt=node_sibling.order).update(order=F('order') - 1)
-                node_origin.order = node_sibling.order - 1
+        self.ajust_order_when_is_the_same_parent(node_origin, node_sibling, parent_origin, parent_sibling, children_parent_origin)
 
-            if(node_origin.order > node_sibling.order):
-                children_parent_origin.filter( order__gte=node_sibling.order, order__lt=node_origin.order).update(order=F('order') + 1)
-                node_origin.order = node_sibling.order
+        self.move_when_is_different_parent(node_origin, node_sibling, parent_origin, parent_sibling, children_parent_origin, children_parent_sibling)
+        
 
+
+    def move_when_is_different_parent(self, node_origin, node_sibling, parent_origin, parent_sibling, children_parent_origin, children_parent_sibling):
         if(parent_origin != parent_sibling):
             path_origin  = node_origin.path + "/"
             depth_diff = node_origin.depth - node_sibling.depth
@@ -90,6 +88,24 @@ class MenuManager(models.Manager):
             node_origin.order = node_sibling.order
             # Change the path of children
             descendents.update(path = Replace('path', V(path_origin), V(new_path +"/")), depth = F('depth') - depth_diff)
-        
+            
+            node_origin.save()
 
-        node_origin.save()
+    def ajust_order_when_is_the_same_parent(self, node_origin, node_sibling, parent_origin, parent_sibling, children_parent_origin):
+        if(parent_origin == parent_sibling):
+            if(node_origin.order < node_sibling.order): 
+                children_parent_origin.filter(order__gt=node_origin.order, order__lt=node_sibling.order).update(order=F('order') - 1)
+                node_origin.order = node_sibling.order - 1
+
+            if(node_origin.order > node_sibling.order):
+                children_parent_origin.filter( order__gte=node_sibling.order, order__lt=node_origin.order).update(order=F('order') + 1)
+                node_origin.order = node_sibling.order
+            
+            node_origin.save()
+            
+    def get_node_by_id(self, node_id):
+        return self.get(id=node_id)
+    
+    def validate_move(self, node_origin, node_sibling):
+        if node_sibling.path.startswith(f"{node_origin.path}/"):
+            raise ValidationError("El menu no se puede mover debajo de algun hijo suyo")
