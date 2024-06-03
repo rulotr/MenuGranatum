@@ -36,7 +36,7 @@ Crear menus
    * Mover un nodo arriba de otro nodo del mismo nivel
      Mover un node debajo de otro nodo de diferente nivel 
      Mover un node arriba de otro nodo de diferente nivel 
-     No se puede mover un nodo a un lado de un hijo del mismo
+   * No se puede mover un nodo a un lado de un hijo del mismo
 
 
     Hacer un nodo hijo de otro nodo
