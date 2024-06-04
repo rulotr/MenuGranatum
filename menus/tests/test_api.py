@@ -6,6 +6,18 @@ from rest_framework.test import APITestCase
 from menus.models import Menu
 from menugranatum.users.models import User
 
+def create_simple_menu_four_levels_for_test():    
+    Menu.objects.create(id=1, name="Module 1", path='/1',   depth=1,  order=1)
+    Menu.objects.create(id=2, name="..Menu 1.1", path='/1/2',  depth=2, order=1)
+    Menu.objects.create(id=3, name="..Menu 1.2", path='/1/3',  depth=2, order=2)
+    Menu.objects.create(id=4, name="..Menu 1.3", path='/1/4',  depth=2, order=3)
+    Menu.objects.create(id=5, name="....Menu 1.3.1", path='/1/4/5',  depth=3, order=1)
+    Menu.objects.create(id=6, name="....Menu 1.3.2", path='/1/4/6',  depth=3, order=2)
+    Menu.objects.create(id=7, name="....Menu 1.3.2.1", path='/1/4/6/7',  depth=4, order=1)
+    Menu.objects.create(id=8, name="Module 2", path='/8',   depth=1,  order=2)
+    Menu.objects.create(id=9, name="..Menu 2.1", path='/8/9',  depth=2, order=1)
+    
+
 class ModuleAPITestCase(APITestCase):
     def setUp(self):
         self.base_url_list = reverse('menus:module-list')
@@ -60,3 +72,31 @@ class ModuleAPITestCase(APITestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response['content-type'], 'application/json')
         self.assertEqual(result, {'id':id_result, 'name': 'Module 1', 'path': f'/{id_result}', 'depth': 1, 'order': 1})
+
+    def test_post_invalid_module(self):
+        self.client.force_login(user = self.user)
+        data = {'name': '     '}
+        response = self.client.post(self.base_url_list, data, format='json')
+        result = json.loads(response.content)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response['content-type'], 'application/json')
+        self.assertEqual(result, {'name': ['This field may not be blank.']})
+        self.assertEqual(Menu.objects.count(), 0)
+
+    def test_get_module_tree(self):
+        self.client.force_login(user=self.user)
+        create_simple_menu_four_levels_for_test()
+
+        expected = [ { "id": 1, "name":"Module 1", "path": "/1", "depth": 1, "order": 1},
+                 { "id": 2, "name":"..Menu 1.1", "path": "/1/2", "depth": 2, "order": 1},
+                 { "id": 3, "name":"..Menu 1.2", "path": "/1/3", "depth": 2, "order": 2},
+                 { "id": 4, "name":"..Menu 1.3", "path": "/1/4", "depth": 2, "order": 3},
+                 { "id": 5, "name":"....Menu 1.3.1", "path": "/1/4/5", "depth": 3, "order": 1},
+                 { "id": 6, "name":"....Menu 1.3.2", "path": "/1/4/6", "depth": 3, "order": 2},
+                 { "id": 7, "name":"....Menu 1.3.2.1", "path": "/1/4/6/7", "depth": 4, "order": 1},
+                ]
+
+        response = self.client.get(self.base_url_details(pk=1))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['content-type'], 'application/json')
+        self.assertEqual(response.data, expected)

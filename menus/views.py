@@ -40,4 +40,10 @@ class ModuleListApi(APIView):
 
 
 class ModuleDetailApi(APIView):
-    pass
+    def get(self, request, pk):
+        try:
+            module_tree = Menu.objects.get_module_tree(pk)
+            output_serializer = ModuleSerializer(module_tree, many=True)
+            return Response(output_serializer.data, status=status.HTTP_200_OK)
+        except ValidationError as  err:
+            return Response(err, status=status.HTTP_404_NOT_FOUND)

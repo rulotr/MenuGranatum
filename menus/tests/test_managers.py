@@ -508,8 +508,22 @@ class TestMenuQueries(TestCase):
         next_num_order = Menu.objects.get_next_num_order_module()
 
         self.assertEqual(next_num_order, 3)
+        
+    def test_get_module_tree(self):
+        create_simple_menu_four_levels_for_test()
+        Menu.objects.create(name="Module 2", id=8, path='/8', depth=1, order=2)
+        Menu.objects.create(name="Menu 2.1", id=9, path='/8/9', depth=2, order=1)
 
-            
+        module_tree = Menu.objects.get_module_tree(8)
+        
+        self.assertEqual(module_tree[0].id, 8)
+        self.assertEqual(module_tree[0].path, "/8")
+        self.assertEqual(module_tree[1].id, 9)
+        self.assertEqual(module_tree[1].path, "/8/9")
+        
+        self.assertEqual(len(module_tree), 2)
+        
+
 
   
 

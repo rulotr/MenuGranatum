@@ -2,7 +2,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.db.models.functions import Coalesce, Replace
-from django.db.models import Max, F, Value as V
+from django.db.models import Max, F, Q, Value as V
 
 class MenuQueryset(models.query.QuerySet):
     
@@ -14,7 +14,15 @@ class MenuQueryset(models.query.QuerySet):
                 num=Coalesce(Max("order"), 0))['num']
         
         return order + 1
+    
+    def get_module_tree(self, module_id):
+        module_tree = self.filter(
+            Q(id=module_id) |
+            Q(path__startswith= f"/{module_id}/") 
+            ).order_by('depth', 'order', 'id')                        
 
+        return module_tree
+    
 class MenuManager(models.Manager):
 
     def get_queryset(self):
