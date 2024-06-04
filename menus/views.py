@@ -47,3 +47,10 @@ class ModuleDetailApi(APIView):
             return Response(output_serializer.data, status=status.HTTP_200_OK)
         except ValidationError as  err:
             return Response(err, status=status.HTTP_404_NOT_FOUND)
+
+class ModuleOperationApi(APIView):
+    
+    def put(self, request, pk_module, pk_sibling):
+        Menu.objects.move_before_sibling(pk_module, pk_sibling)
+        return Response({}, status=status.HTTP_200_OK)
+    

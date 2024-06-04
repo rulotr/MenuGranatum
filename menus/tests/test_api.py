@@ -30,12 +30,20 @@ class ModuleAPITestCase(APITestCase):
     def base_url_details(self, pk):
         return reverse('menus:module-detail', kwargs={'pk': pk})
 
+    def base_url_move_before_to(self, pk_module, pk_sibling):
+        return reverse('menus:module-move-before', kwargs={'pk_module': pk_module, 'pk_sibling': pk_sibling})
 
     def test_url_detail(self):
         url_detail_expected = '/api/modules/2/'
         url_detail = self.base_url_details(2)
 
         self.assertEqual(url_detail, url_detail_expected)
+
+    def test_url_move_before_to(self):
+        url_move_before_to_expected = '/api/modules/2/move_before/1'
+        url_move_before_to = self.base_url_move_before_to(2, 1)
+
+        self.assertEqual(url_move_before_to, url_move_before_to_expected)
 
     def test_list_modules(self):
         self.client.force_login(user = self.user)
@@ -100,3 +108,20 @@ class ModuleAPITestCase(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['content-type'], 'application/json')
         self.assertEqual(response.data, expected)
+
+    def test_move_module_before_to(self):
+        self.client.force_login(user=self.user)
+        Menu.objects.create(id=1, name="Module 1", path='/1',   depth=1,  order=1)
+        Menu.objects.create(id=2, name="Module 2", path='/2',   depth=1,  order=2)
+        Menu.objects.create(id=3, name="Module 3", path='/3',   depth=1,  order=3)
+
+        url_move_before_to = self.base_url_move_before_to(3, 1)
+
+        response = self.client.put(url_move_before_to,{})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['content-type'], 'application/json')
+        self.assertEqual(Menu.objects.get(id=3).order, 1)
+        self.assertEqual(Menu.objects.get(id=1).order, 2)
+        self.assertEqual(Menu.objects.get(id=2).order, 3)
+
