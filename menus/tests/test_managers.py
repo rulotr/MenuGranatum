@@ -488,6 +488,23 @@ class TestMeuOperations(TestCase):
         complete_menu_list = get_list_for_test()
         self.assertEqual(complete_menu_list, expected)
 
+from unittest.mock import patch
+from menus.managers import MenuManager
+
+class TestMenuManager(TestCase):
+
+
+    @patch.object(MenuManager, 'move_before_sibling')
+    def test_move_calls_move_before_sibling(self, mock_move_before_sibling):
+        menu_manager = MenuManager()
+        node_origin_id = 1
+        move_type = "before"
+        node_sibling_id = 2
+
+        menu_manager.move(node_origin_id, move_type, node_sibling_id)
+
+        mock_move_before_sibling.assert_called_once_with(node_origin_id, node_sibling_id)
+
 class TestMenuQueries(TestCase):
     def test_get_all_modules(self):
         module1 = Menu.objects.create(name="Module 1", id=1, path='/1', depth=1)

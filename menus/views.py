@@ -18,6 +18,9 @@ class ModulePostSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
         extra_kwargs = {'id': {'read_only': False, 'required': False}}
 
+class ModuleMoveSerializer(serializers.Serializer):
+    move = serializers.CharField(max_length=30)
+    to = serializers.IntegerField()
 
 class ModuleListApi(APIView):
     def get(self, request):
@@ -50,7 +53,13 @@ class ModuleDetailApi(APIView):
 
 class ModuleOperationApi(APIView):
     
-    def put(self, request, pk_module, pk_sibling):
-        Menu.objects.move_before_sibling(pk_module, pk_sibling)
+    def put(self, request, pk_module):
+        serializer = ModuleMoveSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        move_type = data.get('move')
+        pk_sibling = data.get('to')
+       
+        Menu.objects.move(node_origin_id=pk_module, move_type=move_type, node_sibling_id=pk_sibling ) 
         return Response({}, status=status.HTTP_200_OK)
     

@@ -59,7 +59,11 @@ class MenuManager(models.Manager):
             return f"{parent.path}/{menu.id}"
         else:
             return f"/{menu.id}"  # Nodo principal
-
+        
+    #Test move with mock
+    def move(self, node_origin_id, move_type, node_sibling_id):
+        if move_type == "before":
+            self.move_before_sibling(node_origin_id, node_sibling_id)
         
     def move_before_sibling(self, node_origin_id, node_sibling_id):
         node_origin = self.get_node_by_id(node_origin_id)
